@@ -528,15 +528,33 @@ class BasicSocketTests(unittest.TestCase):
         cert = {'subject': ((('commonName', 'example.com'),),)}
         ok(cert, 'example.com')
         ok(cert, 'ExAmple.cOm')
+        ok(cert, 'example.com.')
+        ok(cert, 'ExAmple.cOm.')
         fail(cert, 'www.example.com')
         fail(cert, '.example.com')
         fail(cert, 'example.org')
         fail(cert, 'exampleXcom')
 
+        cert = {'subject': ((('commonName', 'example.com.'),),)}
+        ok(cert, 'example.com')
+        ok(cert, 'ExAmple.cOm')
+        ok(cert, 'example.com.')
+        ok(cert, 'ExAmple.cOm.')
+        fail(cert, 'www.example.com')
+        fail(cert, 'www.example.com.')
+        fail(cert, '.example.com')
+        fail(cert, '.example.com.')
+        fail(cert, 'example.org')
+        fail(cert, 'example.org.')
+        fail(cert, 'exampleXcom')
+
         cert = {'subject': ((('commonName', '*.a.com'),),)}
         ok(cert, 'foo.a.com')
+        ok(cert, 'foo.a.com.')
         fail(cert, 'bar.foo.a.com')
+        fail(cert, 'bar.foo.a.com.')
         fail(cert, 'a.com')
+        fail(cert, 'a.com.')
         fail(cert, 'Xa.com')
         fail(cert, '.a.com')
 
@@ -546,8 +564,11 @@ class BasicSocketTests(unittest.TestCase):
         fail(cert, 'foo.com')
         fail(cert, 'f.com')
         fail(cert, 'bar.com')
+        fail(cert, 'bar.com.')
         fail(cert, 'foo.a.com')
+        fail(cert, 'foo.a.com.')
         fail(cert, 'bar.foo.com')
+        fail(cert, 'bar.foo.com.')
 
         # NULL bytes are bad, CVE-2013-4073
         cert = {'subject': ((('commonName',
@@ -599,6 +620,17 @@ class BasicSocketTests(unittest.TestCase):
         # When there is a subjectAltName, commonName isn't used
         fail(cert, 'linuxfrz.org')
 
+        # Slightly fake real-world example with trailing dot
+        cert = {'notAfter': 'Jun 26 21:41:46 2011 GMT',
+                'subject': ((('commonName', 'linuxfrz.org'),),),
+                'subjectAltName': (('DNS', 'linuxfr.org.'),
+                                   ('DNS', 'linuxfr.com.'),
+                                   ('othername', '<unsupported>'))}
+        ok(cert, 'linuxfr.org')
+        ok(cert, 'linuxfr.com')
+        ok(cert, 'linuxfr.org.')
+        ok(cert, 'linuxfr.com.')
+
         # A pristine real-world example
         cert = {'notAfter': 'Dec 18 23:59:59 2011 GMT',
                 'subject': ((('countryName', 'US'),),
@@ -608,6 +640,20 @@ class BasicSocketTests(unittest.TestCase):
                             (('commonName', 'mail.google.com'),))}
         ok(cert, 'mail.google.com')
         fail(cert, 'gmail.com')
+        # Only commonName is considered
+        fail(cert, 'California')
+
+        # A pristine real-world example
+        cert = {'notAfter': 'Dec 18 23:59:59 2011 GMT',
+                'subject': ((('countryName', 'US'),),
+                            (('stateOrProvinceName', 'California'),),
+                            (('localityName', 'Mountain View'),),
+                            (('organizationName', 'Google Inc'),),
+                            (('commonName', 'mail.google.com.'),))}
+        ok(cert, 'mail.google.com')
+        ok(cert, 'mail.google.com.')
+        fail(cert, 'gmail.com')
+        fail(cert, 'gmail.com.')
         # Only commonName is considered
         fail(cert, 'California')
 
