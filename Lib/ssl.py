@@ -189,6 +189,12 @@ def _dnsname_match(dn, hostname):
     if not dn:
         return False
 
+    # strip trailing dot
+    if dn[-1] == '.':
+        dn = dn[:-1]
+    if hostname[-1] == '.':
+        hostname = hostname[:-1]
+
     leftmost, *remainder = dn.split(r'.')
 
     wildcards = leftmost.count('*')
