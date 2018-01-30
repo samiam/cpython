@@ -219,6 +219,8 @@ def urlopen(url, data=None, timeout=socket._GLOBAL_DEFAULT_TIMEOUT,
         _opener = opener = build_opener()
     else:
         opener = _opener
+    print("*********: ", url)
+    print("*********: ", opener)
     return opener.open(url, data, timeout)
 
 def install_opener(opener):
@@ -318,6 +320,7 @@ def request_host(request):
 
     # remove port, if present
     host = _cut_port_re.sub("", host, 1)
+    print("Host:", host)
     return host.lower()
 
 class Request:
@@ -505,6 +508,7 @@ class OpenerDirector:
                 return result
 
     def open(self, fullurl, data=None, timeout=socket._GLOBAL_DEFAULT_TIMEOUT):
+        print("OPEN:::")
         # accept a URL or a Request object
         if isinstance(fullurl, str):
             req = Request(fullurl, data)
@@ -522,6 +526,7 @@ class OpenerDirector:
             meth = getattr(processor, meth_name)
             req = meth(req)
 
+        print("req: ", req, "data: ", data)
         response = self._open(req, data)
 
         # post-process response
@@ -539,8 +544,10 @@ class OpenerDirector:
             return result
 
         protocol = req.type
+        print("Protocol ", protocol)
         result = self._call_chain(self.handle_open, protocol, protocol +
                                   '_open', req)
+        print("result", result)
         if result:
             return result
 
@@ -1283,6 +1290,7 @@ class AbstractHTTPHandler(BaseHandler):
 
         # will parse host:port
         h = http_class(host, timeout=req.timeout, **http_conn_args)
+        print("H: ", host," h: ", h)
         h.set_debuglevel(self._debuglevel)
 
         headers = dict(req.unredirected_hdrs)
@@ -1877,6 +1885,8 @@ class URLopener:
                     host = realhost
 
         if not host: raise OSError('http error', 'no host given')
+
+        print("*** In generic: ", host)
 
         if proxy_passwd:
             proxy_passwd = unquote(proxy_passwd)

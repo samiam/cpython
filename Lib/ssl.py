@@ -189,6 +189,12 @@ def _dnsname_match(dn, hostname):
     if not dn:
         return False
 
+    # strip trailing dot
+#    if dn[-1] == '.':
+#        dn = dn[:-1]
+#    if hostname[-1] == '.':
+#        hostname = hostname[:-1]
+
     leftmost, *remainder = dn.split(r'.')
 
     wildcards = leftmost.count('*')
@@ -362,6 +368,7 @@ class SSLContext(_SSLContext):
                     do_handshake_on_connect=True,
                     suppress_ragged_eofs=True,
                     server_hostname=None, session=None):
+        print("sock:", sock)
         return self.sslsocket_class(
             sock=sock,
             server_side=server_side,

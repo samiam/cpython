@@ -1124,6 +1124,9 @@ class HTTPConnection:
                 # but the host of the actual URL, not the host of the
                 # proxy.
 
+# SAM: Here need to add check for trailing dot and make sure
+# not to add it to Host: header
+
                 netloc = ''
                 if url.startswith('http'):
                     nil, netloc, nil, nil, nil = urlsplit(url)
@@ -1388,6 +1391,11 @@ else:
             else:
                 server_hostname = self.host
 
+# SAM: here you need to strip trailing dot to server_hostname
+            if server_hostname[-1] == '.':
+                server_hostname = server_hostname[:-1]
+
+            print("server_hostname ", server_hostname, "\nsock in connect", self.sock)
             self.sock = self._context.wrap_socket(self.sock,
                                                   server_hostname=server_hostname)
 
